@@ -1,5 +1,17 @@
 async function toJson(response) {
-  const data = await response.json();
+  const raw = await response.text();
+  let data = null;
+
+  try {
+    data = raw ? JSON.parse(raw) : {};
+  } catch {
+    if (!response.ok) {
+      throw new Error(`Request failed (${response.status}): ${raw.slice(0, 180) || "Non-JSON response"}`);
+    }
+
+    throw new Error("Server returned invalid JSON.");
+  }
+
   if (!response.ok) {
     throw new Error(data.error || "Request failed");
   }
